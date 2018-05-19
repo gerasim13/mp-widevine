@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Generated with https://github.com/google/shaka-packager version a191c25-release-->
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" xmlns:cenc="urn:mpeg:cenc:2013" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" minBufferTime="PT2S" type="static" mediaPresentationDuration="PT60S">
+  <Period id="0">
+    <AdaptationSet id="0" contentType="audio" subsegmentAlignment="true">
+      <ContentProtection value="cenc" schemeIdUri="urn:mpeg:dash:mp4protection:2011" cenc:default_KID="fd61a3e5-1054-4cdb-8117-67349a47afe0"/>
+      <ContentProtection schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">
+        <cenc:pssh>AAAAU3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADMSEP1ho+UQVEzbgRdnNJpHr+AaDXdpZGV2aW5lX3Rlc3QiEP1ho+UQVEzbgRdnNJpHr+A=</cenc:pssh>
+      </ContentProtection>
+      <Representation id="0" bandwidth="98607" codecs="mp4a.40.5" mimeType="audio/mp4" audioSamplingRate="48000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+        <BaseURL>big_bunny_audio_enc.mp4</BaseURL>
+        <SegmentBase indexRange="915-1030" timescale="48000">
+          <Initialization range="0-914"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="1" contentType="video" maxWidth="1280" maxHeight="720" frameRate="12288/512" subsegmentAlignment="true" par="16:9">
+      <ContentProtection value="cenc" schemeIdUri="urn:mpeg:dash:mp4protection:2011" cenc:default_KID="fd61a3e5-1054-4cdb-8117-67349a47afe0"/>
+      <ContentProtection schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">
+        <cenc:pssh>AAAAU3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADMSEP1ho+UQVEzbgRdnNJpHr+AaDXdpZGV2aW5lX3Rlc3QiEP1ho+UQVEzbgRdnNJpHr+A=</cenc:pssh>
+      </ContentProtection>
+      <Representation id="1" bandwidth="673710" codecs="avc1.4d401f" mimeType="video/mp4" sar="1:1" width="854" height="480">
+        <BaseURL>big_bunny_480p_enc.mp4</BaseURL>
+        <SegmentBase indexRange="978-1081" timescale="12288">
+          <Initialization range="0-977"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="2" bandwidth="1271692" codecs="avc1.4d401f" mimeType="video/mp4" sar="1:1" width="960" height="540">
+        <BaseURL>big_bunny_540p_enc.mp4</BaseURL>
+        <SegmentBase indexRange="978-1081" timescale="12288">
+          <Initialization range="0-977"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="3" bandwidth="1925366" codecs="avc1.4d4028" mimeType="video/mp4" sar="1:1" width="1280" height="720">
+        <BaseURL>big_bunny_720p_enc.mp4</BaseURL>
+        <SegmentBase indexRange="979-1082" timescale="12288">
+          <Initialization range="0-978"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

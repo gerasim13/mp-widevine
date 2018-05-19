@@ -1,0 +1,2 @@
+FROM jrottenberg/ffmpeg:latest
+ENTRYPOINT  ["/bin/bash"]

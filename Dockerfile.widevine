@@ -1,0 +1,12 @@
+FROM ubuntu:14.04
+RUN apt-get update
+RUN apt-get install -y python python-pip python-dev build-essential
+RUN pip install --upgrade pip
+RUN apt-get install -y libssl-dev libffi-dev
+RUN openssl req -newkey rsa:2048 -nodes -keyout /root/localhost.key -x509 -days 365 -out /root/localhost.crt -subj "/C=ES/ST=Madrid/L=Madrid/O=mp-videoprojects/CN=mp.videoprojects@gmail.com"
+WORKDIR /widevine
+ADD requirements.txt ./
+RUN pip install -r requirements.txt
+ADD widevine_*.py ./
+EXPOSE 6060
+ENTRYPOINT ["python"]
