@@ -1,0 +1,91 @@
+version: '3'
+services:
+  encoder:
+    image: tvup-encoder
+    build:
+      context: .
+      dockerfile: Dockerfile.encoder
+    volumes:
+      - ./medias:/medias    
+    command: -c "mkdir -p /medias/encoder && ffmpeg
+      -y -i /medias/${MEDIA_NAME}.${MEDIA_EXT} -vn -c:a libfdk_aac -profile:a aac_he -b:a 96k /medias/encoder/${MEDIA_NAME}_audio.mp4
+      -y -i /medias/${MEDIA_NAME}.${MEDIA_EXT} -an -vf 'scale=1280:trunc(ow/a/2)*2' -c:v libx264 -profile:v main -level:v 4.0 -x264opts scenecut=0:open_gop=0:min-keyint=72:keyint=72 -movflags +faststart -minrate 2.0M -maxrate 2.0M -bufsize 3.0M -b:v 2.0M /medias/encoder/${MEDIA_NAME}_720p.mp4
+      -y -i /medias/${MEDIA_NAME}.${MEDIA_EXT} -an -vf 'scale=960:trunc(ow/a/2)*2' -c:v libx264 -profile:v main -level:v 3.1 -x264opts scenecut=0:open_gop=0:min-keyint=72:keyint=72 -movflags +faststart -minrate 1.3M -maxrate 1.3M -bufsize 2.6M -b:v 1.3M /medias/encoder/${MEDIA_NAME}_540p.mp4
+      -y -i /medias/${MEDIA_NAME}.${MEDIA_EXT} -an -vf 'scale=854:trunc(ow/a/2)*2' -c:v libx264 -profile:v main -level:v 3.1 -x264opts scenecut=0:open_gop=0:min-keyint=72:keyint=72 -movflags +faststart -minrate 700k -maxrate 700k -bufsize 800k -b:v 700k /medias/encoder/${MEDIA_NAME}_480p.mp4"
+
+  packager:
+    image: tvup-packager
+    build:
+      context: .
+      dockerfile: Dockerfile.packager
+    volumes:
+      - ./medias:/medias    
+    
+    command: >
+        -c "mkdir -p /medias/packager && if ${EXTERNAL_KEYS} ; then
+              packager input=/medias/encoder/${MEDIA_NAME}_audio.mp4,stream=audio,output=/medias/packager/${MEDIA_NAME}_audio_enc.mp4\
+              input=/medias/encoder/${MEDIA_NAME}_480p.mp4,stream=video,output=/medias/packager/${MEDIA_NAME}_480p_enc.mp4\
+              input=/medias/encoder/${MEDIA_NAME}_540p.mp4,stream=video,output=/medias/packager/${MEDIA_NAME}_540p_enc.mp4\
+              input=/medias/encoder/${MEDIA_NAME}_720p.mp4,stream=video,output=/medias/packager/${MEDIA_NAME}_720p_enc.mp4\
+              --enable_widevine_encryption -clear_lead 0 --key_server_url ${GET_KEYS_URL}/{PROVIDER_ID} --content_id ${CONTENT_ID} --signer ${PROVIDER_ID}\
+              --aes_signing_key ${PROVIDER_KEY} --aes_signing_iv ${PROVIDER_IV} --crypto_period_duration 0\
+              --mpd_output /medias/packager/${MEDIA_NAME}_enc.mpd
+            else
+              ./src/packager/tools/pssh/pssh-box.py --widevine-system-id --content-id ${CONTENT_ID} --key-id ${KEY_ID} --provider ${PROVIDER_ID} --hex > pssh && packager\
+              input=/medias/encoder/${MEDIA_NAME}_audio.mp4,stream=audio,output=/medias/packager/${MEDIA_NAME}_audio_enc.mp4\
+              input=/medias/encoder/${MEDIA_NAME}_480p.mp4,stream=video,output=/medias/packager/${MEDIA_NAME}_480p_enc.mp4\
+              input=/medias/encoder/${MEDIA_NAME}_540p.mp4,stream=video,output=/medias/packager/${MEDIA_NAME}_540p_enc.mp4\
+              input=/medias/encoder/${MEDIA_NAME}_720p.mp4,stream=video,output=/medias/packager/${MEDIA_NAME}_720p_enc.mp4\
+              --enable_raw_key_encryption -clear_lead 0 --keys key_id=${KEY_ID}:key=${CONTENT_KEY} --pssh `cat pssh` --crypto_period_duration 0 --mpd_output /medias/packager/${MEDIA_NAME}_enc.mpd
+            fi"
+  proxy:
+    image: tvup-widevine-proxy
+    build:
+      context: .
+      dockerfile: Dockerfile.widevine
+    ports:
+      - 6060:6060
+    environment:
+      - CONTENT_ID=${CONTENT_ID}
+      - KEY_ID=${KEY_ID}
+      - CONTENT_KEY=${CONTENT_KEY}
+      - PROVIDER_ID=${PROVIDER_ID}
+      - PROVIDER_KEY=${PROVIDER_KEY}
+      - PROVIDER_IV=${PROVIDER_IV}
+      - GET_LICENSE_URL=${GET_LICENSE_URL}
+      - EXTERNAL_KEYS=${EXTERNAL_KEYS}
+      - ALLOWED_TRACKS=${ALLOWED_TRACKS}
+      - CAN_PLAY=${CAN_PLAY}
+      - CAN_RENEW=${CAN_RENEW}
+      - LICENSE_DURATION_SECONDS=${LICENSE_DURATION_SECONDS}
+      - RENEWAL_DELAY_SECONDS=${RENEWAL_DELAY_SECONDS}
+      - PLAYBACK_DURATION_SECONDS=${PLAYBACK_DURATION_SECONDS}
+      - RENTAL_DURATION_SECONDS=${RENTAL_DURATION_SECONDS}
+      - RENEWAL_RETRY_INTERVAL_SECONDS=${RENEWAL_RETRY_INTERVAL_SECONDS}
+      - RENEWAL_RECOVERY_DURATION_SECONDS=${RENEWAL_RECOVERY_DURATION_SECONDS}
+      - MAX_NUM_SESSIONS=${MAX_NUM_SESSIONS}
+
+    command: widevine_proxy.py
+  
+  cdn:
+    image: tvup-cdn
+    build:
+      context: .
+      dockerfile: Dockerfile.cdn
+    ports:
+      - 8080:8080
+    volumes:
+      - ./medias:/medias
+    command: /usr/sbin/apache2ctl -D FOREGROUND
+
+  keys:
+    image: tvup-widevine-keys
+    build:
+      context: .
+      dockerfile: Dockerfile.widevine
+    environment:
+      - PROVIDER_ID=${PROVIDER_ID}
+      - PROVIDER_KEY=${PROVIDER_KEY}
+      - PROVIDER_IV=${PROVIDER_IV}
+      - GET_KEYS_URL=${GET_KEYS_URL}
+    command: widevine_key.py ${CONTENT_ID}

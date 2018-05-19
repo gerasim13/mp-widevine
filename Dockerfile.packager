@@ -1,0 +1,5 @@
+FROM google/shaka-packager:latest
+RUN curl https://bootstrap.pypa.io/get-pip.py | python
+RUN cd src/packager/third_party/protobuf/python && PATH=../../../../out/{Debug,Release}/:"$PATH" python setup.py build
+RUN pip install six
+ENTRYPOINT  ["/bin/bash"]

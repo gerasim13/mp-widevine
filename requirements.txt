@@ -1,0 +1,8 @@
+requests==2.5.3
+webapp2
+webob==1.7.2
+pyopenssl
+paste
+pycrypto==2.6.1
+
+
