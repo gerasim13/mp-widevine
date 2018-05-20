@@ -22,6 +22,7 @@ pipeline {
         stage('Push Registry') {
             steps {
                 sh 'docker tag tvup-cdn tvup-cdn:stable'
+                
             }
         }
     }
