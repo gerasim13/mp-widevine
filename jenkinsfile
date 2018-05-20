@@ -21,8 +21,10 @@ pipeline {
         }
         stage('Push Registry') {
             steps {
-                sh 'docker tag tvup-cdn tvup-cdn:stable'
-                
+                withCredentials([usernamePassword(credentialsId: 'd6d0f54a-2cd6-4127-b2b3-d8a1c3a78536', passwordVariable: 'password', usernameVariable: 'user')]) {
+                    sh 'docker tag tvup-cdn pmarsi/tvup-cdn:stable'
+                    sh 'docker push pmarsi/tvup-cdn:stable'
+                }
             }
         }
     }
