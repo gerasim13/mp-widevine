@@ -6,9 +6,9 @@ pipeline {
                 sh 'docker-compose build cdn'
             }
         }
-        stage('Test') {
+        stage('Run') {
             steps {
-                echo 'TEST'
+                sh 'docker run -d -p 6060:6060 tvup-cdn /usr/sbin/apache2ctl -D FOREGROUND'
             }
         }
         stage('Deploy') {

@@ -73,7 +73,7 @@ services:
       context: .
       dockerfile: Dockerfile.cdn
     ports:
-      - 8080:8080
+      - 6060:6060
     volumes:
       - ./medias:/medias
     command: /usr/sbin/apache2ctl -D FOREGROUND
