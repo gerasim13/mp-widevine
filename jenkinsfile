@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'docker rm `docker ps -a -q`'
+                sh 'docker rm -f `docker ps -a -q`'
                 sh 'docker-compose build cdn'
             }
         }
