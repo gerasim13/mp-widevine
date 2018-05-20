@@ -6,14 +6,20 @@ pipeline {
                 sh 'docker-compose build cdn'
             }
         }
+        stage('Test') {
+            steps {
+                sh '/bin/nc -vz localhost 6060'
+                sh '/bin/nc -vz localhost 22'
+            }
+        }
         stage('Run') {
             steps {
                 sh 'docker run -d -p 6060:6060 tvup-cdn /usr/sbin/apache2ctl -D FOREGROUND'
             }
         }
-        stage('Deploy') {
+        stage('Push Registry') {
             steps {
-                echo 'DEPLOYy'
+                sh 'docker tag tvup-cdn tvup-cdn:stable'
             }
         }
     }
