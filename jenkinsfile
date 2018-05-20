@@ -3,19 +3,20 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'docker rm -f `docker ps -a -q`'
                 sh 'docker-compose build cdn'
             }
         }
         stage('Test') {
             steps {
-                sh '/bin/nc -vz localhost 8080'
+                echo 'Test'
+                sh 'docker run --rm --name cdn-app -d -p 6060:6060 tvup-cdn /usr/sbin/apache2ctl -D FOREGROUND'
                 sh '/bin/nc -vz localhost 22'
+                sh '/bin/nc -vz localhost 6060'
             }
-        }
-        stage('Run') {
-            steps {
-                sh 'docker run -d -p 6060:6060 tvup-cdn /usr/sbin/apache2ctl -D FOREGROUND'
+            post {
+                always {
+                    sh 'docker stop `docker ps -a -q`'
+                }
             }
         }
         stage('Push Registry') {
