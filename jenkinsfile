@@ -23,6 +23,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'password', usernameVariable: 'user')]) {
                     sh 'docker tag tvup-cdn pmarsi/tvup-cdn:stable'
+                    sh 'docker login -u pmarsi -p Compresion_88'
                     sh 'docker push pmarsi/tvup-cdn:stable'
                 }
             }
